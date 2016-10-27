@@ -33,6 +33,7 @@ app.main = {
         this.playerMode = 'light';
         this.player = this.makePlayer();
         
+        window.onkeydown = this.checkKeyboard.bind(this);
         
         // start the game loop
         this.update();
@@ -49,7 +50,6 @@ app.main = {
         var dt = this.calculateDeltaTime();
         
         // 4 - Update
-        this.checkKeyboard();
         //this.moveBullets(dt);
         this.updatePlayer(dt);
         
@@ -58,8 +58,9 @@ app.main = {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
         
-        
+        // draw player
         this.player.draw(this.ctx);
+        
         
         // draw debug info
 		if (this.debug) {
@@ -101,7 +102,7 @@ app.main = {
             ctx.restore();
         };
         
-        var movePlayer = function(delta){ // changes the y position of the player
+        var movePlayer = function(dt){ // changes the y position of the player
             player.y += delta;
         }
         
@@ -119,21 +120,6 @@ app.main = {
     updatePlayer : function (dt) {
         this.player.playerMode = this.playerMode;
         
-
-        
-        /*document.addEventListener('keydown', function(event) {
-            if(event.keyCode == 38 || event.keyCode == 87) {
-                console.log('Up was pressed');
-                //this.player.move(10);
-                console.dir(this);
-            }
-            else if(event.keyCode == 40 || event.keyCode == 83) {
-                console.log('Down was pressed');
-                this.player.move(-10);
-            }
-        });
-        */
-    
     },
     
     makeBullet: function () {
@@ -164,22 +150,24 @@ app.main = {
         return b;
     },
     
-    checkKeyboard: function(){    
-        window.onkeydown = function(e){
-            var key = e.keyCode;
-            if(key == 38 || key == 87){
-                console.log("up");
-                console.dir(this.this);
-            }
-            else if(key == 40 || key == 83){
-                console.log("down");
-            }
-            else if(key == 32){
-                console.log("space pressed, firing");
-            }
-            else if(key == 81){
-                console.log("q pressed, switch mode")
-            }
+    checkKeyboard: function(e){    
+        var key = e.keyCode;
+        if(key == 38 || key == 87){
+            //console.log("up");
+            this.player.move(-10);
+        }
+        else if(key == 40 || key == 83){
+            //console.log("down");
+            this.player.move(10);
+        }
+        else if(key == 32){
+            console.log("space pressed, firing");
+        }
+        else if(key == 81){
+            // toggle playermode
+            this.playerMode = (this.playerMode == 'light' ? 'dark' : 'light');
+            
+            //console.log("q pressed, switch mode")
         }
     }
 };
