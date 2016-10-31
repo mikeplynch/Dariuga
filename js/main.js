@@ -20,6 +20,8 @@ app.main = {
     paused: false,
     player: undefined,
     playerMode: undefined,
+    stars: new Array(),
+    bullets: new Array(),
     
     init : function () {
         console.log("app.main.init() called");
@@ -32,6 +34,7 @@ app.main = {
         
         this.playerMode = 'light';
         this.player = this.makePlayer();
+        this.makeStars(200);
         
         window.onkeydown = this.checkKeyboard.bind(this);
         
@@ -50,7 +53,6 @@ app.main = {
         var dt = this.calculateDeltaTime();
         
         // 4 - Update
-        //this.moveBullets(dt);
         this.updatePlayer(dt);
         
         // 5 - DRAW
@@ -58,8 +60,12 @@ app.main = {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
         
+        // draw and update stars
+        this.drawStars(this.ctx);
+        
         // draw player
         this.player.draw(this.ctx);
+        this.updateBullets(this.ctx, dt);
         
         
         // draw debug info
@@ -102,7 +108,7 @@ app.main = {
             ctx.restore();
         };
         
-        var movePlayer = function(dt){ // changes the y position of the player
+        var movePlayer = function(delta){ // changes the y position of the player
             player.y += delta;
         }
         
@@ -123,32 +129,32 @@ app.main = {
     },
     
     makeBullet: function () {
-        var drawBullet = function(ctx){
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(this.player.x, this.player.y, 10, Math.PI *2, false);
-            ctx.closePath();
-            ctx.fillStyle = (this.playerMode == 'light' ? '#29B6F6' : 'black');
-            ctx.strokeStyle = (this.playerMode == 'light' ? 'white' : '#C70039');            
-            ctx.fill();
-            ctx.stroke();
-            ctx.restore();
-        }
-        
-        var moveBullet = function(dt){
-            this.x += 100 * dt;
-        }
-        
-        var b = {};
-        
+        var b = {};        
         b.x = this.player.x + 20;
-        b.y = this.player.y;
-        b.type = this.player.playerMode;
-        b.draw = drawBullet;
-        b.move = moveBullet;
-        
-        return b;
+        b.y = this.player.y + 20;
+        b.fillStyle = (this.playerMode == 'light' ? '#29B6F6' : 'black');
+        b.strokeStyle = (this.playerMode == 'light' ? 'white' : '#C70039');
+        this.bullets.push(b);
     },
+    
+    updateBullets: function(ctx, dt){
+        if (this.bullets.length > 0){
+            for(var i = 0; i < this.bullets.length; i++){
+                ctx.save();
+                ctx.beginPath();
+                var x = this.bullets[i].x += 500 * dt;
+                var y = this.bullets[i].y;
+
+                ctx.arc(x, y, 6, Math.PI *2, false);
+                ctx.closePath();
+                ctx.fillStyle = this.bullets[i].fillStyle;
+                ctx.strokeStyle = this.bullets[i].strokeStyle;
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    },  
     
     checkKeyboard: function(e){    
         var key = e.keyCode;
@@ -156,18 +162,51 @@ app.main = {
             //console.log("up");
             this.player.move(-10);
         }
-        else if(key == 40 || key == 83){
+        if(key == 40 || key == 83){
             //console.log("down");
             this.player.move(10);
         }
-        else if(key == 32){
-            console.log("space pressed, firing");
+        if(key == 32){
+            //console.log("space pressed, firing");
+            this.makeBullet();
         }
-        else if(key == 81){
+        if(key == 81){  //q
             // toggle playermode
             this.playerMode = (this.playerMode == 'light' ? 'dark' : 'light');
             
             //console.log("q pressed, switch mode")
+        }
+    },
+    
+    makeStars: function(numStars){
+        for(var i = 0; i < numStars; i++){
+            var s = {};
+            s.x = Math.random() * this.WIDTH;
+            s.y = Math.random() * this.HEIGHT;
+            s.fillStyle = "rgba(250,250,250,"+ Math.random() +")";
+            this.stars.push(s);
+        }
+    },
+    
+    drawStars: function(ctx){
+        var s;
+        for(s in this.stars){
+            
+            ctx.save();
+            ctx.shadowColor = "#FAFAFA";
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = this.stars[s].fillStyle;
+            
+            //move the stars
+            var x = this.stars[s].x -= 0.5;
+            if(this.stars[s].x <= 0){
+                this.stars[s].x = this.WIDTH;
+            }
+            var y = this.stars[s].y;
+            ctx.fillRect(x, y, 3, 3);
+            ctx.restore();
         }
     }
 };
