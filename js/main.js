@@ -22,6 +22,7 @@ app.main = {
     playerMode: undefined,
     stars: new Array(),
     bullets: new Array(),
+    enemies: new Array(),
     
     init : function () {
         console.log("app.main.init() called");
@@ -35,6 +36,8 @@ app.main = {
         this.playerMode = 'light';
         this.player = this.makePlayer();
         this.makeStars(200);
+        
+        // for testing collisions;
         
         window.onkeydown = this.checkKeyboard.bind(this);
         
@@ -132,6 +135,7 @@ app.main = {
         var b = {};        
         b.x = this.player.x + 20;
         b.y = this.player.y + 20;
+        b.mode = this.player.playerMode;
         b.fillStyle = (this.playerMode == 'light' ? '#29B6F6' : 'black');
         b.strokeStyle = (this.playerMode == 'light' ? 'white' : '#C70039');
         this.bullets.push(b);
@@ -143,8 +147,7 @@ app.main = {
                 ctx.save();
                 ctx.beginPath();
                 var x = this.bullets[i].x += 500 * dt;
-                var y = this.bullets[i].y;
-
+                var y = this.bullets[i].y;           
                 ctx.arc(x, y, 6, Math.PI *2, false);
                 ctx.closePath();
                 ctx.fillStyle = this.bullets[i].fillStyle;
@@ -152,6 +155,9 @@ app.main = {
                 ctx.fill();
                 ctx.stroke();
                 ctx.restore();
+                if (x > this.WIDTH){
+                    this.bullets.splice(i, 1);
+                }
             }
         }
     },  
@@ -207,6 +213,43 @@ app.main = {
             var y = this.stars[s].y;
             ctx.fillRect(x, y, 3, 3);
             ctx.restore();
+        }
+    },
+    
+    makeEnemies: function(){
+        // static for now for testing
+        // enemy one - light
+        var l = {};
+        l.x = 1050;
+        l.y = 200;
+        l.mode = 'light';
+        l.hits = 0;
+        
+        // enemy two - dark
+        var d = {};
+        d.x = 1050;
+        d.y = 400;
+        d.mode = 'dark';
+        d.hits = 0;
+    },
+    
+    drawEnemies: function(ctx, dt){
+        
+    },
+    
+    checkForCollision: function(){
+        if (this.bullets.length > 0){
+            for(var i = 0; i < this.bullets.length; i++){
+                var b = this.bullets[i];
+                if(this.enemies > 0){
+                    for (var j = 0; j < this.enemies.length; j++){
+                        var e = this.enemies[j];
+                        if(b.type == e.type){
+                            
+                        }
+                    }
+                }
+            }
         }
     }
 };
