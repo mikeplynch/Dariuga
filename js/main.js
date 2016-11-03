@@ -23,6 +23,9 @@ app.main = {
     stars: new Array(),
     bullets: new Array(),
     enemies: new Array(),
+    moving: false,
+    firing: false,
+    moveDirection: true, // true = up, false = down
     
     init : function () {
         console.log("app.main.init() called");
@@ -111,8 +114,10 @@ app.main = {
             ctx.restore();
         };
         
-        var movePlayer = function(delta){ // changes the y position of the player
-            player.y += delta;
+        var movePlayer = function(dt){ // changes the y position of the player
+            var delta = this.moveDirection ? -400 : 400;            
+            player.y += delta * dt;
+            this.moving = false;
         }
         
         var player = {};
@@ -121,13 +126,18 @@ app.main = {
         player.y = (this.HEIGHT / 2) - 20;
         
         player.draw = drawPlayer;
-        player.move = movePlayer;
+        player.move = movePlayer.bind(this);
         
         return player;
     },
         
     updatePlayer : function (dt) {
         this.player.playerMode = this.playerMode;
+        
+        if(this.moving){
+            this.player.move(dt, this);
+            
+        }
         
     },
     
@@ -166,11 +176,16 @@ app.main = {
         var key = e.keyCode;
         if(key == 38 || key == 87){
             //console.log("up");
-            this.player.move(-10);
+            //this.player.move(-10);
+            this.moveDirection = true;
+            this.moving = true;
+            
         }
         if(key == 40 || key == 83){
             //console.log("down");
-            this.player.move(10);
+            //this.player.move(10);
+            this.moveDirection = false;
+            this.moving = true;
         }
         if(key == 32){
             //console.log("space pressed, firing");
